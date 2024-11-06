@@ -2,5 +2,8 @@ package ru.nsu.array;
 
 import ru.nsu.util.PersistentCollection;
 
-public class PersistentArray implements PersistentCollection {
+/**
+ * Персистентный массив
+ */
+public class PersistentArray<E> implements PersistentCollection<E> {
 }

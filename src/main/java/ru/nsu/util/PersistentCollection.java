@@ -1,6 +1,10 @@
 package ru.nsu.util;
 
-public interface PersistentCollection {
+/**
+ * Персистентная коллекция
+ * @param <E> тип элементов
+ */
+public interface PersistentCollection<E> {
 
     /**
      * Возвращает размер текущей версии коллекции
@@ -17,27 +21,35 @@ public interface PersistentCollection {
 
     /**
      * Добавляет новый элемент в конец текущей версии коллекции
-     * @param o новый элемент
+     * @param e новый элемент
      * @return true, если элемент был успешно добавлен
      */
-    boolean add(Object o);
+    boolean add(E e);
 
     /**
      * Добавляет новый элемент в конец указанной версии коллекции
-     * @param o новый элемент
+     * @param e новый элемент
      * @param version версия коллекции
      * @return true, если элемент был успешно добавлен
      */
-    boolean add(Object o, int version);
+    boolean add(E e, int version);
+
+    /**
+     * Добавляет новый элемент по индексу в текущей версии коллекции
+     * @param e новый элемент
+     * @param index индекс элемента
+     * @return true, если элемент был успешно добавлен
+     */
+    boolean add(int index, E e);
 
     /**
      * Добавляет новый элемент по индексу в указанной версии коллекции
-     * @param o новый элемент
+     * @param e новый элемент
      * @param index индекс элемента
      * @param version версия коллекции
      * @return true, если элемент был успешно добавлен
      */
-    boolean add(Object o, int index, int version);
+    boolean add(int index, E e, int version);
 
     /**
      * Удаляет элемент из текущей версии коллекции
@@ -56,12 +68,11 @@ public interface PersistentCollection {
 
     /**
      * Удаляет элемент по индексу из указанной версии коллекции
-     * @param o удаляемый элемент
      * @param index индекс элемента
      * @param version версия коллекции
      * @return true, если элемент был успешно удалён
      */
-    boolean remove(Object o, int index, int version);
+    boolean remove(int index, int version);
 
     /**
      * Возвращает элемент по индексу из текущей версии коллекции
@@ -78,7 +89,6 @@ public interface PersistentCollection {
      */
     Object get(int index, int version);
 
-
     /**
      * Проверяет, что текущая версия коллекции пуста
      * @return true, если текущая версия коллекции пуста
@@ -93,7 +103,7 @@ public interface PersistentCollection {
     boolean isEmpty(int version);
 
     /**
-     * Проверяет, что если текущая версия коллекции содержит указанный элемент
+     * Проверяет, что текущая версия коллекции содержит указанный элемент
      * @param o элемент
      * @return true, если текущая версия коллекции содержит указанный элемент
      */
