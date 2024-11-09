@@ -13,19 +13,30 @@ public class PersistentElement<E> {
         initialVersion = version;
     }
 
-    /**
-     * @return элемент текущей версии
-     */
     public E get() {
         return versions.findMaxNotGreaterThan(Integer.MAX_VALUE);
     }
 
-    /**
-     * @param version версия
-     * @return элемент указанной версии
-     */
     public E get(int version) {
+        if (version < initialVersion) {
+            return null;
+        }
         return versions.findMaxNotGreaterThan(version);
     }
 
+    public E set(int version, E element) {
+        versions.insert(version, element);
+        return versions.findMaxNotGreaterThan(version - 1);
+    }
+
+    public String toString() {
+        return get().toString();
+    }
+
+    public String toString(int version) {
+        if (version < initialVersion) {
+            return null;
+        }
+        return get(version).toString();
+    }
 }
