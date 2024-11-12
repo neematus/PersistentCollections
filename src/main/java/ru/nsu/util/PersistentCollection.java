@@ -40,7 +40,7 @@ public interface PersistentCollection<E> {
      * @param index индекс элемента
      * @return true, если элемент был успешно добавлен
      */
-    boolean add(int index, E e);
+    boolean addAtIndex(int index, E e);
 
     /**
      * Добавляет новый элемент по индексу в указанной версии коллекции
@@ -49,22 +49,29 @@ public interface PersistentCollection<E> {
      * @param version версия коллекции
      * @return true, если элемент был успешно добавлен
      */
-    boolean add(int index, E e, int version);
+    boolean addAtIndex(int index, E e, int version);
 
     /**
      * Удаляет элемент из текущей версии коллекции
-     * @param o удаляемый элемент
+     * @param e удаляемый элемент
      * @return true, если элемент был успешно удалён
      */
-    boolean remove(Object o);
+    boolean remove(E e);
 
     /**
      * Удаляет элемент из указанной версии коллекции
-     * @param o удаляемый элемент
+     * @param e удаляемый элемент
      * @param version версия коллекции
      * @return true, если элемент был успешно удалён
      */
-    boolean remove(Object o, int version);
+    boolean remove(E e, int version);
+
+    /**
+     * Удаляет элемент по индексу из текущей версии коллекции
+     * @param index индекс элемента
+     * @return true, если элемент был успешно удалён
+     */
+    boolean removeAtIndex(int index);
 
     /**
      * Удаляет элемент по индексу из указанной версии коллекции
@@ -72,7 +79,7 @@ public interface PersistentCollection<E> {
      * @param version версия коллекции
      * @return true, если элемент был успешно удалён
      */
-    boolean remove(int index, int version);
+    boolean removeAtIndex(int index, int version);
 
     /**
      * Возвращает элемент по индексу из текущей версии коллекции
@@ -88,6 +95,23 @@ public interface PersistentCollection<E> {
      * @return элемент по индексу из указанной версии коллекции
      */
     Object get(int index, int version);
+
+    /**
+     * Изменяет элемент по индексу в текущей версии коллекции
+     * @param e новый элемент
+     * @param index индекс элемента
+     * @return true, если элемент был успешно изменён
+     */
+    boolean set(int index, E e);
+
+    /**
+     * Изменяет элемент по индексу в указанной версии коллекции
+     * @param e новый элемент
+     * @param index индекс элемента
+     * @param version версия коллекции
+     * @return true, если элемент был успешно изменён
+     */
+    boolean set(int index, E e, int version);
 
     /**
      * Проверяет, что текущая версия коллекции пуста
