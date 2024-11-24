@@ -79,6 +79,21 @@ public interface PersistentMap<K, V> {
     V get(Object key, int version);
 
     /**
+     * Изменяет значение по ключу из текущей версии ассоциативного массива
+     * @param key ключ
+     * @return true, если значение было изменено
+     */
+//    boolean set(Object key, V value);
+//
+//    /**
+//     * Изменяет значение по ключу из указанной версии ассоциативного массива
+//     * @param key ключ
+//     * @param version версия ассоциативного массива
+//     * @return true, если значение было изменено
+//     */
+//    boolean set(Object key, V value, int version);
+
+    /**
      * Добавляет значение по ключу в текущую версию ассоциативного массива
      * @param key ключ
      * @param value значение
