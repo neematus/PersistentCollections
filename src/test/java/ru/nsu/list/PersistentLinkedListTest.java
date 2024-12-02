@@ -7,7 +7,7 @@ class PersistentLinkedListTest {
 
     PersistentLinkedList<Integer> list = new PersistentLinkedList<>(new ListNode<>(1));
 
-    @org.junit.jupiter.api.Test
+    @Test
     void testGetCurrentVersion() {
         assertEquals(1, list.getCurrentVersion());
     }
@@ -154,5 +154,20 @@ class PersistentLinkedListTest {
     @Test
     void testToString2() {
         assertEquals("version: 1\n(1)", list.toString(1));
+    }
+
+    @Test
+    void testUndo() {
+        list.add(2);
+        list.undo();
+        assertEquals("version: 1\n(1)", list.toString());
+    }
+
+    @Test
+    void testRedo() {
+        list.add(2);
+        list.undo();
+        list.redo();
+        assertEquals("version: 2\n(1, 2)", list.toString());
     }
 }

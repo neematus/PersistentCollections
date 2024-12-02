@@ -4,6 +4,7 @@ import ru.nsu.util.PersistentCollection;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Персистентный двусвязный список
@@ -11,6 +12,7 @@ import java.util.List;
 public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     private final List<ListNode<E>> versions = new LinkedList<>();
+    private final Stack<ListNode<E>> redo = new Stack<>();
 
     public PersistentLinkedList() {}
 
@@ -18,6 +20,18 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
         versions.add(head);
     }
 
+    public void undo() {
+        if (!versions.isEmpty()) {
+            redo.push(versions.get(versions.size() - 1));
+            versions.remove(versions.size() - 1);
+        }
+    }
+
+    public void redo() {
+        if (!redo.empty()) {
+            versions.add(redo.pop());
+        }
+    }
 
     public int getCurrentVersion() {
         return versions.size();
