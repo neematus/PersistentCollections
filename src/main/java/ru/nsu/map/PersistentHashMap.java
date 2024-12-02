@@ -6,18 +6,15 @@ import ru.nsu.list.PersistentLinkedList;
 import ru.nsu.util.PersistentMap;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
     private static int capacity = 16;
-    private final AVLTree<PersistentLinkedList<MapEntry<K, V>>> table;
     private final ArrayList<AVLTree<PersistentLinkedList<MapEntry<K, V>>>> versions;
+    private final Stack<AVLTree<PersistentLinkedList<MapEntry<K, V>>>> redo = new Stack<>();
 
     public PersistentHashMap() {
-//        this.table = new ArrayList<>(DEFAULT_INITIAL_CAPACITY);
-//        for (int i = 0; i < DEFAULT_INITIAL_CAPACITY; i++) {
-//            table.add(new PersistentLinkedList<>());
-//        }
-        this.table = new AVLTree<>();
+        AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = new AVLTree<>();
         for (int i = 0; i < capacity; i++) {
             table.insert(i, new PersistentLinkedList<>(null));
         }
@@ -26,11 +23,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
         versions.add(table);
     }
     public PersistentHashMap(int  size) {
-//        this.table = new ArrayList<>(size);
-//        for (int i = 0; i < size; i++) {
-//            table.add(new PersistentLinkedList<>());
-//        }
-        this.table = new AVLTree<>();
+        AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = new AVLTree<>();
         capacity = size;
         for (int i = 0; i < size; i++) {
             table.insert(i, new PersistentLinkedList<>(null));
@@ -38,6 +31,21 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
         versions = new ArrayList<>();
         versions.add(table);
+    }
+
+    public void undo() {
+        if (!versions.isEmpty()) {
+            AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = versions.get(versions.size() - 1);
+            redo.push(table);
+            versions.remove(versions.size() - 1);
+        }
+    }
+
+    public void redo() {
+        if (!redo.isEmpty()) {
+            AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = redo.pop();
+            versions.add(table);
+        }
     }
 
     private int index(int hash) {
@@ -210,7 +218,9 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
                     entry.add(el.getVal());
                 }
             }
-            entry.add(new MapEntry<>(key, value));
+            MapEntry<K, V> newEntry = new MapEntry<>(key, value);
+            entry.add(newEntry);
+//            undo.push(newEntry);
 
             versions.add(root);
 
@@ -252,6 +262,8 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
                 if (entry.get(i, version) != null && entry.get(i).getVal().getKey().equals(key)) {
                     V value = entry.get(i).getVal().getValue();
                     entry.removeAtIndex(i, version);
+//                    MapEntry<K, V> newEntry = new MapEntry<>((K) key, value);
+//                    undo.push(newEntry);
                     return value;
                 }
             }

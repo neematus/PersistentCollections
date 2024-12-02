@@ -146,4 +146,21 @@ class PersistentHashMapTest {
         map.put(2, "2");
         assertEquals("version: 3\n{(1 = 1), (2 = 2)}", map.toString(3));
     }
+
+    @Test
+    void testUndo() {
+        map.put(1, "1");
+        map.put(2, "2");
+        map.undo();
+        assertEquals("version: 2\n{(1 = 1)}", map.toString());
+    }
+
+    @Test
+    void testRedo() {
+        map.put(1, "1");
+        map.put(2, "2");
+        map.undo();
+        map.redo();
+        assertEquals("version: 3\n{(1 = 1), (2 = 2)}", map.toString());
+    }
 }
