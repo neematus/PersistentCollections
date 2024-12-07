@@ -1,4 +1,4 @@
-package ru.nsu.common;
+package ru.nsu.array.fatnode;
 
 import lombok.Getter;
 import lombok.Setter;

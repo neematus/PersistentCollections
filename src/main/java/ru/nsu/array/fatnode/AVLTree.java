@@ -1,4 +1,4 @@
-package ru.nsu.common;
+package ru.nsu.array.fatnode;
 
 public class AVLTree<V> {
 

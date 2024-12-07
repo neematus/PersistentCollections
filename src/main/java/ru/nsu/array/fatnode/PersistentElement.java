@@ -1,7 +1,6 @@
-package ru.nsu.array;
+package ru.nsu.array.fatnode;
 
 import lombok.Getter;
-import ru.nsu.common.AVLTree;
 
 @Getter
 public class PersistentElement<E> {

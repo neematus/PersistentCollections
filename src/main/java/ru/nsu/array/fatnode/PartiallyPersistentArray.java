@@ -1,4 +1,4 @@
-package ru.nsu.array;
+package ru.nsu.array.fatnode;
 
 import java.util.ArrayList;
 import java.util.List;
