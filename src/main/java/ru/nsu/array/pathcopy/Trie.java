@@ -28,13 +28,11 @@ public class Trie<E> {
 
     public Trie(int numberOfElements) {
         this.numberOfElements = numberOfElements;
-        if (numberOfElements == 0) {
-            depth = 0;
-        } else if (numberOfElements == 1) {
-            depth = 1;
-        } else {
-            depth = (int) Math.ceil(Math.log(numberOfElements) / Math.log(2.)); // ln(numberOfElements) / ln(2)
-        }
+        depth = switch (numberOfElements) {
+            case 0 -> 0;
+            case 1 -> 1;
+            default -> (int) Math.ceil(Math.log(numberOfElements) / Math.log(2.)); // ln(numberOfElements) / ln(2)
+        };
     }
 
     /**
