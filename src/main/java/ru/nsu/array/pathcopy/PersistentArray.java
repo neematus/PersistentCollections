@@ -40,7 +40,7 @@ public class PersistentArray<E> {
     }
 
     /**
-     * Добавление элемента в данную версии массива
+     * Добавление элемента в данную версию массива
      */
     public void add(E value, int version) {
         Trie<E> prevVersion = versions.get(version);
@@ -50,7 +50,6 @@ public class PersistentArray<E> {
         if (prevVersion.getNumberOfElements() == Math.pow(2, prevVersion.getDepth())) {
             newNode.setLeftChild(prevVersion.getRoot());
             newNode.setRightChild(new TrieNode<>());
-
             newNode = newNode.getRightChild();
             for (int i = 0; i < newVersion.getDepth() - 1; i++) {
                 newNode.setLeftChild(new TrieNode<>());
@@ -75,7 +74,6 @@ public class PersistentArray<E> {
                     newNode = newNode.getLeftChild();
                     break;
                 }
-
                 newNode.setRightChild(prevNode.getRightChild());
                 newNode.setLeftChild(new TrieNode<>());
                 newNode = newNode.getLeftChild();
