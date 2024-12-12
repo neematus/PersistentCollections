@@ -20,6 +20,9 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
         versions.add(head);
     }
 
+    /**
+     * Откатывает последнее изменение коллекции
+     */
     public void undo() {
         if (!versions.isEmpty()) {
             redo.push(versions.get(versions.size() - 1));
@@ -27,6 +30,9 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
         }
     }
 
+    /**
+     * Возвращает последний откат коллекции
+     */
     public void redo() {
         if (!redo.empty()) {
             versions.add(redo.pop());
