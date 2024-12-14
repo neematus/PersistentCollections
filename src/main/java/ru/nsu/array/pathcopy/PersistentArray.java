@@ -1,6 +1,7 @@
 package ru.nsu.array.pathcopy;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  * Полностью персистентный массив
@@ -12,8 +13,20 @@ public class PersistentArray<E> {
      */
     private final ArrayList<Trie<E>> versions = new ArrayList<>();
 
+    /**
+     * Стек с отмененными версиями
+     */
+    private final Stack<Trie<E>> redo = new Stack<>();
+
     public PersistentArray() {
         versions.add(new Trie<>(0));
+    }
+
+    /**
+     * Получение элемента по индексу из последней версии массива
+     */
+    public E get(int index) {
+        return versions.get(versions.size() - 1).getValue(index);
     }
 
     /**
@@ -21,6 +34,13 @@ public class PersistentArray<E> {
      */
     public E get(int index, int version) {
         return versions.get(version).getValue(index);
+    }
+
+    /**
+     * Изменение значения элемента по индексу в последней версии массива
+     */
+    public void set(int index, E value) {
+        set(index, value, versions.size() - 1);
     }
 
     /**
@@ -37,6 +57,13 @@ public class PersistentArray<E> {
 
         newNode.setValue(value);
         versions.add(newVersion);
+    }
+
+    /**
+     * Добавление элемента в последнюю версию массива
+     */
+    public void add(E value) {
+        add(value, versions.size() - 1);
     }
 
     /**
@@ -87,6 +114,24 @@ public class PersistentArray<E> {
         }
 
         return newNode;
+    }
+
+    /**
+     * Отмена предыдущего изменения (UNDO)
+     */
+    public void undo() {
+        if (!versions.isEmpty()) {
+            redo.push(versions.remove(versions.size() - 1));
+        }
+    }
+
+    /**
+     * Возврат предыдущего изменения (REDO)
+     */
+    public void redo() {
+        if (!redo.empty()) {
+            versions.add(redo.pop());
+        }
     }
 
 }
