@@ -1,8 +1,5 @@
 package ru.nsu.map;
 
-import ru.nsu.common.AVLTree;
-import ru.nsu.list.ListNode;
-import ru.nsu.list.PersistentLinkedList;
 import ru.nsu.util.PersistentMap;
 
 import java.util.ArrayList;
