@@ -1,36 +1,31 @@
 package ru.nsu.map;
 
-import ru.nsu.array.fatnode.AVLTree;
-import ru.nsu.list.ListNode;
-import ru.nsu.list.PersistentLinkedList;
+import ru.nsu.array.pathcopy.PersistentArray;
 import ru.nsu.util.PersistentMap;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
     private static int capacity = 16;
-    private final ArrayList<AVLTree<PersistentLinkedList<MapEntry<K, V>>>> versions;
-    private final Stack<AVLTree<PersistentLinkedList<MapEntry<K, V>>>> redo = new Stack<>();
+    private final PersistentArray<ArrayList<MapEntry<K, V>>> versions;
+    private Integer redo = 0;
 
     public PersistentHashMap() {
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = new AVLTree<>();
+        PersistentArray<ArrayList<MapEntry<K, V>>> table = new PersistentArray<>();
         for (int i = 0; i < capacity; i++) {
-            table.insert(i, new PersistentLinkedList<>(null));
+            table.add(new ArrayList<>());
         }
 
-        versions = new ArrayList<>();
-        versions.add(table);
+        versions = table;
     }
     public PersistentHashMap(int  size) {
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = new AVLTree<>();
+        PersistentArray<ArrayList<MapEntry<K, V>>> table = new PersistentArray<>();
         capacity = size;
         for (int i = 0; i < size; i++) {
-            table.insert(i, new PersistentLinkedList<>(null));
+            table.add(new ArrayList<>());
         }
 
-        versions = new ArrayList<>();
-        versions.add(table);
+        versions = table;
     }
 
     /**
@@ -38,9 +33,8 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
      */
     public void undo() {
         if (!versions.isEmpty()) {
-            AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = versions.get(versions.size() - 1);
-            redo.push(table);
-            versions.remove(versions.size() - 1);
+            versions.undo();
+            redo++;
         }
     }
 
@@ -48,17 +42,14 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
      * Возвращает последний откат коллекции
      */
     public void redo() {
-        if (!redo.isEmpty()) {
-            AVLTree<PersistentLinkedList<MapEntry<K, V>>> table = redo.pop();
-            versions.add(table);
+        if (redo > 0) {
+            versions.redo();
+            redo--;
         }
     }
 
     private int index(int hash) {
         return hash % capacity;
-    }
-    private int hash() {
-        return super.hashCode();
     }
 
     /**
@@ -66,7 +57,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
      * @return текущая версию коллекции
      */
     public int getCurrentVersion() {
-        return versions.size();
+        return versions.getCurrentVersion() - capacity;
     }
 
     @Override
@@ -81,17 +72,11 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
         }
 
         int count = 0;
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> current = versions.get(version - 1);
-
-        if (current == null) {
-            return 0;
-        }
 
         for (int i = 0; i < capacity; i++) {
-            PersistentLinkedList<MapEntry<K,V>> el = current.findMaxNotGreaterThan(i);
-            if (el != null && el.getCurrentVersion() >= version) {
-                count += el.size(version);
-            }
+            ArrayList<MapEntry<K,V>> entry = versions.get(i, version + capacity -1);
+            if (entry != null)
+                count += entry.size();
         }
 
         return count;
@@ -114,22 +99,18 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
     @Override
     public boolean containsKey(Object key, int version) {
-        if (version > versions.size()) {
+        if (version > versions.getCurrentVersion()) {
             return false;
         }
 
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> root = versions.get(version - 1);
+        int hash = key.hashCode();
+        int index = index(hash);
 
-        for (int i = 0; i < capacity; i++) {
-            PersistentLinkedList<MapEntry<K, V>> el = root.findMaxNotGreaterThan(i);
-            if (el != null) {
-                int count;
-                if(el.getCurrentVersion() < version) count = el.getCurrentVersion(); else count = el.size(version);
-                for (int j = 0; j < count; j++) {
-                    ListNode<MapEntry<K,V>> node = el.get(j);
-                    if (node != null && node.getVal() != null && node.getVal().getKey().equals(key)) {
-                        return true;
-                    }
+        ArrayList<MapEntry<K, V>> el = versions.get(index, version + capacity - 1);
+        if (el != null) {
+            for (MapEntry<K, V> node : el) {
+                if (node != null && node.getKey().equals(key)) {
+                    return true;
                 }
             }
         }
@@ -144,20 +125,15 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
     @Override
     public boolean containsValue(Object value, int version) {
-        if (version > versions.size()) {
+        if (version > versions.getCurrentVersion()) {
             return false;
         }
 
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> root = versions.get(version - 1);
-
         for (int i = 0; i < capacity; i++) {
-            PersistentLinkedList<MapEntry<K, V>> el = root.findMaxNotGreaterThan(i);
+            ArrayList<MapEntry<K, V>> el = versions.get(i, version + capacity - 1);
             if (el != null) {
-                int count;
-                if(el.getCurrentVersion() < version) count = el.getCurrentVersion(); else count = el.size(version);
-                for (int j = 0; j < count; j++) {
-                    ListNode<MapEntry<K,V>> node = el.get(j);
-                    if (node != null && node.getVal() != null && node.getVal().getValue().equals(value)) {
+                for (MapEntry<K, V> node : el) {
+                    if (node != null && node.getValue().equals(value)) {
                         return true;
                     }
                 }
@@ -174,22 +150,17 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
     @Override
     public V get(Object key, int version) {
-        if (version > versions.size()) {
+        if (version > versions.getCurrentVersion()) {
             return null;
         }
 
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> root = versions.get(version - 1);
-
-        for (int i = 0; i < capacity; i++) {
-            PersistentLinkedList<MapEntry<K, V>> el = root.findMaxNotGreaterThan(i);
-            if (el != null) {
-                int count;
-                if(el.getCurrentVersion() < version) count = el.getCurrentVersion(); else count = el.size(version);
-                for (int j = 0; j < count; j++) {
-                    ListNode<MapEntry<K,V>> node = el.get(j);
-                    if (node != null && node.getVal() != null && node.getVal().getKey().equals(key)) {
-                        return node.getVal().getValue();
-                    }
+        int hash = key.hashCode();
+        int index = index(hash);
+        ArrayList<MapEntry<K, V>> el = versions.get(index, version + capacity - 1);
+        if (el != null) {
+            for (MapEntry<K, V> node : el) {
+                if (node != null && node.getKey().equals(key)) {
+                    return node.getValue();
                 }
             }
         }
@@ -204,44 +175,31 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
     @Override
     public V put(K key, V value, int version) {
-        if(version > versions.size()) {
+        if(version > versions.getCurrentVersion()) {
             return null;
         }
-        int hash = key.hashCode();
-        int index = index(hash);
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> root = versions.get(version - 1);
 
         try {
-            PersistentLinkedList<MapEntry<K, V>> entry = root.findMaxNotGreaterThan(index);
+            int hash = key.hashCode();
+            int index = index(hash);
+            ArrayList<MapEntry<K, V>> entry = versions.get(index, version + capacity -1);
+            ArrayList<MapEntry<K, V>> newEntry = new ArrayList<>(entry);
 
             if (containsKey(key, version)) {
-                MapEntry<K, V> el = entry.get(entry.size()-1).getVal();
-                int counter = 1;
+                int counter = 0;
+                MapEntry<K, V> el = newEntry.get(counter);
                 while (el.getKey() != null && !el.getKey().equals(key)) {
-                    el = entry.get(entry.size()-counter).getVal();
-                    counter++;
+                    el = newEntry.get(++counter);
                 }
                 el.setValue(value);
-                entry.set(entry.size() - counter, el);
-
+                newEntry.set(counter, el);
+                versions.set(index, newEntry);
 
             } else {
-                if (entry == null) {
-                    entry = new PersistentLinkedList<>(null);
-                }
-                ListNode<MapEntry<K, V>> el = entry.get(entry.getCurrentVersion() - 1);
-                while (entry.getCurrentVersion() < version) {
-                    if (el == null) {
-                        entry.add(null);
-                    } else {
-                        entry.set(entry.size()-1, el.getVal());
-                    }
-                }
-                MapEntry<K, V> newEntry = new MapEntry<>(key, value);
-                entry.add(newEntry);
+                MapEntry<K, V> newEl = new MapEntry<>(key, value);
+                newEntry.add(newEl);
+                versions.set(index, newEntry, version + capacity -1);
             }
-
-            versions.add(root);
 
             return value;
         } catch (Exception ex) {
@@ -256,51 +214,30 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
     @Override
     public V remove(Object key, int version) {
-        if(version > versions.size() || !containsKey(key, version)) {
+        if(version > versions.getCurrentVersion() || !containsKey(key, version)) {
             return null;
         }
 
-        int hash = key.hashCode();
-        int index = index(hash);
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> root = versions.get(version - 1);
-        V value = null;
-
         try {
-            PersistentLinkedList<MapEntry<K, V>> entry = root.findMaxNotGreaterThan(index);
-            if (entry == null) {
-                return null;
-            }
-            ListNode<MapEntry<K, V>> el = entry.get(entry.getCurrentVersion() - 1);
-            while (entry.getCurrentVersion() < version) {
-                if (el == null) {
-                    entry.add(null);
-                } else {
-                    entry.set(entry.size()-1, el.getVal());
-                }
-            }
-            for (int i = 0; i < entry.size(version); i++) {
-                if (entry.get(i, version) != null && entry.get(i, version).getVal().getKey().equals(key)) {
-                    value = entry.get(i).getVal().getValue();
-                    entry.removeAtIndex(i, version);
-                }
-            }
+            int hash = key.hashCode();
+            int index = index(hash);
+            V value = null;
+            ArrayList<MapEntry<K, V>> entry = versions.get(index, version + capacity - 1);
+            ArrayList<MapEntry<K, V>> newEntry = new ArrayList<>(entry);
 
-            versions.add(root);
+            for (MapEntry<K, V> kvMapEntry : newEntry) {
+                if (kvMapEntry != null && kvMapEntry.getKey().equals(key)) {
+                    value = kvMapEntry.getValue();
+                    break;
+                }
+            }
+            newEntry.removeIf(entry2 -> entry2.getKey().equals(key));
+            versions.set(index, newEntry, version + capacity - 1);
+
             return value;
         } catch (Exception ex) {
             return null;
         }
-    }
-
-    @Override
-    public boolean clear() {
-        return clear(getCurrentVersion());
-    }
-
-    @Override
-    public boolean clear(int version) {
-        versions.set(version - 1, null);
-        return true;
     }
 
     @Override
@@ -310,27 +247,19 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
     @Override
     public String toString(int version) {
-        if (version > versions.size()) {
+        if (version > versions.getCurrentVersion()) {
             return "{empty}";
         }
 
         StringBuilder result = new StringBuilder("version: " + version + "\n");
-        AVLTree<PersistentLinkedList<MapEntry<K, V>>> current = versions.get(version - 1);
 
         result.append("{");
         for (int i = 0; i < capacity; i++) {
-            PersistentLinkedList<MapEntry<K,V>> entry = current.findMaxNotGreaterThan(i);
-            String list;
-            if(entry.getCurrentVersion() < version)
-                list = entry.toString(entry.getCurrentVersion());
-            else list = entry.toString(version);
-            if (!list.contains("empty")) {
-                for (String el : list.substring(list.indexOf("\n")+1).split(", ")) {
-                    if (el.contains("=")) {
-                        result.append(el).append(", ");
-                    }
+            ArrayList<MapEntry<K,V>> entry = versions.get(i, version + capacity -1);
+            if (entry != null)
+                for (MapEntry<K, V> node : entry) {
+                        result.append(node.toString()).append(", ");
                 }
-            }
         }
 
         if (result.lastIndexOf(", ") == - 1) {

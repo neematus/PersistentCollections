@@ -69,10 +69,13 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
     @Override
     public boolean add(E e, int version) {
         try {
-            ListNode<E> prev = versions.get(version - 1);
             ListNode<E> tail = new ListNode<>(e);
-            ListNode<E> current = new ListNode<>(prev.getVal(), tail, prev.getPrev());
-            tail.setPrev(current);
+
+            if (version != 0) {
+                ListNode<E> prev = versions.get(version - 1);
+                ListNode<E> current = new ListNode<>(prev.getVal(), tail, prev.getPrev());
+                tail.setPrev(current);
+            }
             versions.add(tail);
 
             return true;
@@ -303,18 +306,6 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
     }
 
     @Override
-    public boolean clear() {
-        versions.set(getCurrentVersion() - 1, null);
-        return isEmpty();
-    }
-
-    @Override
-    public boolean clear(int version) {
-        versions.set(version - 1, null);
-        return isEmpty(version);
-    }
-
-    @Override
     public String toString() {
         return toString(getCurrentVersion());
     }
@@ -322,6 +313,9 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
     @Override
     public String toString(int version) {
         StringBuilder result = new StringBuilder();
+        if (version == 0) {
+            return "null";
+        }
         ListNode<E> el = versions.get(version - 1);
 
         if (el == null) {
