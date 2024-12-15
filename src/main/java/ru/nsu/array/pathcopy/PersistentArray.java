@@ -23,6 +23,22 @@ public class PersistentArray<E> {
     }
 
     /**
+     * Возвращает текущую версию коллекции
+     * @return текущая версию коллекции
+     */
+    public int getCurrentVersion() {
+        return versions.size();
+    }
+
+    /**
+     * Проверяет, что текущая версия коллекции пуста
+     * @return true, если текущая версия коллекции пуста
+     */
+    public boolean isEmpty() {
+        return versions.get(getCurrentVersion()-1).getNumberOfElements() == 0;
+    }
+
+    /**
      * Получение элемента по индексу из последней версии массива
      */
     public E get(int index) {
@@ -101,19 +117,48 @@ public class PersistentArray<E> {
                     newNode = newNode.getLeftChild();
                     break;
                 }
-                newNode.setRightChild(prevNode.getRightChild());
+                newNode.setRightChild((prevNode.getRightChild() == null) ? new TrieNode<>() : prevNode.getRightChild());
                 newNode.setLeftChild(new TrieNode<>());
                 newNode = newNode.getLeftChild();
-                prevNode = prevNode.getLeftChild();
+                prevNode = (prevNode.getLeftChild() == null) ? new TrieNode<>() : prevNode.getLeftChild();
             } else {
-                newNode.setLeftChild(prevNode.getLeftChild());
+                newNode.setLeftChild((prevNode.getLeftChild() == null) ? new TrieNode<>() : prevNode.getLeftChild());
                 newNode.setRightChild(new TrieNode<>());
                 newNode = newNode.getRightChild();
-                prevNode = prevNode.getRightChild();
+                prevNode = (prevNode.getRightChild() == null) ? new TrieNode<>() : prevNode.getRightChild();
             }
         }
 
         return newNode;
+    }
+
+    /**
+     * Возвращает строковое представление текущей версии коллекции
+     * @return строковое представление текущей версии коллекции
+     */
+    public String toString() {
+        return toString(getCurrentVersion());
+    }
+
+    /**
+     * Возвращает строковое представление указанной версии коллекции
+     * @param version версия коллекции
+     * @return строковое представление указанной версии коллекции
+     */
+    public String toString(int version) {
+        StringBuilder result = new StringBuilder("version: " + version + "\n{");
+        Trie<E> root = versions.get(version-1);
+
+        for (int i = 0; i < versions.get(version-1).getNumberOfElements(); i++) {
+            E entry = root.getValue(i);
+            if (entry != null)
+                result.append(entry.toString()).append(", ");
+        }
+
+        if (result.lastIndexOf(", ") == - 1) {
+            return result.append("empty}").toString();
+        }
+        return result.delete(result.lastIndexOf(", "), result.lastIndexOf(", ") + 2).append("}").toString();
     }
 
     /**
