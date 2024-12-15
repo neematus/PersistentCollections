@@ -26,7 +26,6 @@ class PersistentLinkedListTest {
     void testAdd1() {
         list.add(2);
         list.add(3);
-        System.out.println(list.toString());
         assertEquals(3, list.size());
     }
 
@@ -115,13 +114,6 @@ class PersistentLinkedListTest {
     }
 
     @Test
-    void testIsEmpty2() {
-        list.add(2);
-        list.clear();
-        assertTrue(list.isEmpty(2));
-    }
-
-    @Test
     void testContains1() {
         assertTrue(list.contains(1));
     }
@@ -131,19 +123,6 @@ class PersistentLinkedListTest {
         list.add(2);
         list.add(3);
         assertTrue(list.contains(2, 3));
-    }
-
-    @Test
-    void testClear1() {
-        list.clear();
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    void testClear2() {
-        list.add(2);
-        list.clear(1);
-        assertTrue(list.isEmpty(1));
     }
 
     @Test

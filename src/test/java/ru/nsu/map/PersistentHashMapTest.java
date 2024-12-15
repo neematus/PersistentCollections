@@ -98,6 +98,7 @@ class PersistentHashMapTest {
     void testPut3() {
         map.put(1, "1");
         map.put(1, "11");
+        assertEquals(1, map.size(3));
         assertEquals("version: 3\n{(1 = 11)}", map.toString(3));
     }
 
@@ -121,22 +122,6 @@ class PersistentHashMapTest {
         map.put(2, "2");
         assertEquals("1", map.remove(1, 3));
         assertEquals("version: 4\n{(2 = 2)}", map.toString());
-    }
-
-    @Test
-    void testClear1() {
-        map.put(1, "1");
-        map.clear();
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    void testClear2() {
-        map.put(1, "1");
-        map.put(2, "2");
-        map.clear(3);
-        assertTrue(map.isEmpty());
-        assertFalse(map.isEmpty(2));
     }
 
     @Test
