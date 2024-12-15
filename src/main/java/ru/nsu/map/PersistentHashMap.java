@@ -74,7 +74,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
         int count = 0;
 
         for (int i = 0; i < capacity; i++) {
-            ArrayList<MapEntry<K,V>> entry = versions.get(i, version + capacity -1);
+            ArrayList<MapEntry<K,V>> entry = versions.get(i, version + capacity);
             if (entry != null)
                 count += entry.size();
         }
@@ -106,7 +106,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
         int hash = key.hashCode();
         int index = index(hash);
 
-        ArrayList<MapEntry<K, V>> el = versions.get(index, version + capacity - 1);
+        ArrayList<MapEntry<K, V>> el = versions.get(index, version + capacity);
         if (el != null) {
             for (MapEntry<K, V> node : el) {
                 if (node != null && node.getKey().equals(key)) {
@@ -130,7 +130,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
         }
 
         for (int i = 0; i < capacity; i++) {
-            ArrayList<MapEntry<K, V>> el = versions.get(i, version + capacity - 1);
+            ArrayList<MapEntry<K, V>> el = versions.get(i, version + capacity);
             if (el != null) {
                 for (MapEntry<K, V> node : el) {
                     if (node != null && node.getValue().equals(value)) {
@@ -156,7 +156,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
         int hash = key.hashCode();
         int index = index(hash);
-        ArrayList<MapEntry<K, V>> el = versions.get(index, version + capacity - 1);
+        ArrayList<MapEntry<K, V>> el = versions.get(index, version + capacity);
         if (el != null) {
             for (MapEntry<K, V> node : el) {
                 if (node != null && node.getKey().equals(key)) {
@@ -182,7 +182,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
         try {
             int hash = key.hashCode();
             int index = index(hash);
-            ArrayList<MapEntry<K, V>> entry = versions.get(index, version + capacity -1);
+            ArrayList<MapEntry<K, V>> entry = versions.get(index, version + capacity);
             ArrayList<MapEntry<K, V>> newEntry = new ArrayList<>(entry);
 
             if (containsKey(key, version)) {
@@ -198,7 +198,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
             } else {
                 MapEntry<K, V> newEl = new MapEntry<>(key, value);
                 newEntry.add(newEl);
-                versions.set(index, newEntry, version + capacity -1);
+                versions.set(index, newEntry, version + capacity);
             }
 
             return value;
@@ -222,7 +222,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
             int hash = key.hashCode();
             int index = index(hash);
             V value = null;
-            ArrayList<MapEntry<K, V>> entry = versions.get(index, version + capacity - 1);
+            ArrayList<MapEntry<K, V>> entry = versions.get(index, version + capacity);
             ArrayList<MapEntry<K, V>> newEntry = new ArrayList<>(entry);
 
             for (MapEntry<K, V> kvMapEntry : newEntry) {
@@ -232,7 +232,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
                 }
             }
             newEntry.removeIf(entry2 -> entry2.getKey().equals(key));
-            versions.set(index, newEntry, version + capacity - 1);
+            versions.set(index, newEntry, version + capacity);
 
             return value;
         } catch (Exception ex) {
@@ -255,7 +255,7 @@ public class PersistentHashMap<K, V> implements PersistentMap<K, V> {
 
         result.append("{");
         for (int i = 0; i < capacity; i++) {
-            ArrayList<MapEntry<K,V>> entry = versions.get(i, version + capacity -1);
+            ArrayList<MapEntry<K,V>> entry = versions.get(i, version + capacity);
             if (entry != null)
                 for (MapEntry<K, V> node : entry) {
                         result.append(node.toString()).append(", ");

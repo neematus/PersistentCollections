@@ -2,6 +2,9 @@ package ru.nsu.array.pathcopy;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Префиксное дерево, листья дерева - элементы массива.
  * Для получения элемента массива по индексу, будем смотреть на
@@ -33,6 +36,17 @@ public class Trie<E> {
             case 1 -> 1;
             default -> (int) Math.ceil(Math.log(numberOfElements) / Math.log(2.)); // ln(numberOfElements) / ln(2)
         };
+    }
+
+    /**
+     * Получение всех элементов массива
+     */
+    public List<E> getValues() {
+        List<E> values = new ArrayList<>();
+        for (int i = 0; i < numberOfElements; i++) {
+            values.add(getValue(i));
+        }
+        return values;
     }
 
     /**

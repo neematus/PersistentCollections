@@ -2,6 +2,7 @@ package ru.nsu.array.pathcopy;
 
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * Полностью персистентный массив
@@ -23,47 +24,45 @@ public class PersistentArray<E> {
     }
 
     /**
-     * Возвращает текущую версию коллекции
-     * @return текущая версию коллекции
+     * Получение номера текущей версии массива
      */
     public int getCurrentVersion() {
         return versions.size();
     }
 
     /**
-     * Проверяет, что текущая версия коллекции пуста
-     * @return true, если текущая версия коллекции пуста
+     * Возвращает true, что текущая версия массива пуста
      */
     public boolean isEmpty() {
-        return versions.get(getCurrentVersion()-1).getNumberOfElements() == 0;
+        return versions.get(getCurrentVersion() - 1).getNumberOfElements() == 0;
     }
 
     /**
-     * Получение элемента по индексу из последней версии массива
+     * Получение элемента по индексу из текущей версии массива
      */
     public E get(int index) {
-        return versions.get(versions.size() - 1).getValue(index);
+        return get(index, getCurrentVersion());
     }
 
     /**
      * Получение элемента по индексу из данной версии массива
      */
     public E get(int index, int version) {
-        return versions.get(version).getValue(index);
+        return versions.get(version - 1).getValue(index);
     }
 
     /**
-     * Изменение значения элемента по индексу в последней версии массива
+     * Изменение значения элемента по индексу в текущей версии массива
      */
     public void set(int index, E value) {
-        set(index, value, versions.size() - 1);
+        set(index, value, getCurrentVersion());
     }
 
     /**
      * Изменение значения элемента по индексу в данной версии массива
      */
     public void set(int index, E value, int version) {
-        Trie<E> prevVersion = versions.get(version);
+        Trie<E> prevVersion = versions.get(version - 1);
         if (prevVersion.getNumberOfElements() - 1 < index) {
             throw new IndexOutOfBoundsException();
         }
@@ -76,17 +75,17 @@ public class PersistentArray<E> {
     }
 
     /**
-     * Добавление элемента в последнюю версию массива
+     * Добавление элемента в текущую версию массива
      */
     public void add(E value) {
-        add(value, versions.size() - 1);
+        add(value, getCurrentVersion());
     }
 
     /**
      * Добавление элемента в данную версию массива
      */
     public void add(E value, int version) {
-        Trie<E> prevVersion = versions.get(version);
+        Trie<E> prevVersion = versions.get(version - 1);
         Trie<E> newVersion = new Trie<>(prevVersion.getNumberOfElements() + 1);
 
         TrieNode<E> newNode = newVersion.getRoot();
@@ -112,20 +111,20 @@ public class PersistentArray<E> {
 
         for (int i = newVersion.getDepth() - 1; i >= 0; i--) {
             if ((index >> i) % 2 == 0) {
-                if (prevNode.getLeftChild() == null) {  // такое происходит только при добавлении нового элемента
+                if (prevNode == null) {
                     newNode.setLeftChild(new TrieNode<>());
                     newNode = newNode.getLeftChild();
-                    break;
+                    continue;
                 }
-                newNode.setRightChild((prevNode.getRightChild() == null) ? new TrieNode<>() : prevNode.getRightChild());
+                newNode.setRightChild(prevNode.getRightChild());
                 newNode.setLeftChild(new TrieNode<>());
                 newNode = newNode.getLeftChild();
-                prevNode = (prevNode.getLeftChild() == null) ? new TrieNode<>() : prevNode.getLeftChild();
+                prevNode = prevNode.getLeftChild();
             } else {
-                newNode.setLeftChild((prevNode.getLeftChild() == null) ? new TrieNode<>() : prevNode.getLeftChild());
+                newNode.setLeftChild(prevNode.getLeftChild());
                 newNode.setRightChild(new TrieNode<>());
                 newNode = newNode.getRightChild();
-                prevNode = (prevNode.getRightChild() == null) ? new TrieNode<>() : prevNode.getRightChild();
+                prevNode = prevNode.getRightChild();
             }
         }
 
@@ -133,40 +132,28 @@ public class PersistentArray<E> {
     }
 
     /**
-     * Возвращает строковое представление текущей версии коллекции
-     * @return строковое представление текущей версии коллекции
+     * Получение строкового представления текущей версии массива
      */
     public String toString() {
         return toString(getCurrentVersion());
     }
 
     /**
-     * Возвращает строковое представление указанной версии коллекции
-     * @param version версия коллекции
-     * @return строковое представление указанной версии коллекции
+     * Получение строкового представления данной версии массива
      */
     public String toString(int version) {
-        StringBuilder result = new StringBuilder("version: " + version + "\n{");
-        Trie<E> root = versions.get(version-1);
-
-        for (int i = 0; i < versions.get(version-1).getNumberOfElements(); i++) {
-            E entry = root.getValue(i);
-            if (entry != null)
-                result.append(entry.toString()).append(", ");
-        }
-
-        if (result.lastIndexOf(", ") == - 1) {
-            return result.append("empty}").toString();
-        }
-        return result.delete(result.lastIndexOf(", "), result.lastIndexOf(", ") + 2).append("}").toString();
+        return "version: " + version + "\n{" +
+                versions.get(version - 1).getValues().stream()
+                        .map(E::toString)
+                        .collect(Collectors.joining(", ")) + "}";
     }
 
     /**
      * Отмена предыдущего изменения (UNDO)
      */
     public void undo() {
-        if (!versions.isEmpty()) {
-            redo.push(versions.remove(versions.size() - 1));
+        if (getCurrentVersion() > 1) {
+            redo.push(versions.remove(getCurrentVersion() - 1));
         }
     }
 
