@@ -8,94 +8,94 @@ class PersistentHashMapTest {
     private final PersistentHashMap<Integer, String> map = new PersistentHashMap<>();
 
     @Test
-    void testSize1() {
+    void testSizeEmpty() {
         assertEquals(0, map.size());
     }
 
     @Test
-    void testSize2() {
+    void testSizeAfterPut() {
         map.put(1, "1");
         assertEquals(1, map.size());
     }
 
     @Test
-    void testSize3() {
+    void testSizeByVersion() {
         map.put(1, "1");
         map.put(2, "2");
-        assertEquals(2, map.size(3));
+        assertEquals(1, map.size(2));
     }
 
     @Test
-    void testIsEmpty1() {
+    void testIsEmpty() {
         assertTrue(map.isEmpty());
     }
 
     @Test
-    void testIsEmpty2() {
+    void testIsEmptyAfterPut() {
         map.put(1, "1");
         assertFalse(map.isEmpty());
     }
 
     @Test
-    void testIsEmpty3() {
+    void testIsEmptyByVersion() {
         map.put(1, "1");
         assertTrue(map.isEmpty(1));
     }
 
     @Test
-    void testContainsKey1() {
+    void testContainsKeyAfterPut() {
         map.put(1, "1");
         assertTrue(map.containsKey(1));
     }
 
     @Test
-    void testContainsKey2() {
+    void testContainsKeyByVersion() {
         map.put(1, "1");
         map.put(2, "2");
-        assertTrue(map.containsKey(1, 3));
+        assertFalse(map.containsKey(2, 2));
     }
 
     @Test
-    void testContainsValue1() {
+    void testContainsValueAfterPut() {
         map.put(1, "1");
         assertTrue(map.containsValue("1"));
     }
 
     @Test
-    void testContainsValue2() {
+    void testContainsValueByVersion() {
         map.put(1, "1");
         map.put(2, "2");
         assertTrue(map.containsValue("1", 3));
     }
 
     @Test
-    void testGet1() {
+    void testGetAfterPut() {
         map.put(1, "1");
         assertEquals("1", map.get(1));
     }
 
     @Test
-    void testGet2() {
+    void testGetByVersion() {
         map.put(1, "1");
         map.put(2, "2");
         assertEquals("1", map.get(1, 3));
     }
 
     @Test
-    void testPut1() {
+    void testPut() {
         assertEquals("1", map.put(1, "1"));
         assertEquals("version: 2\n{(1 = 1)}", map.toString());
     }
 
     @Test
-    void testPut2() {
+    void testPutByVersion() {
         map.put(1, "1");
         assertEquals("2", map.put(2, "2", 2));
         assertEquals("version: 3\n{(1 = 1), (2 = 2)}", map.toString(3));
     }
 
     @Test
-    void testPut3() {
+    void testPutAsReplace() {
         map.put(1, "1");
         map.put(1, "11");
         assertEquals(1, map.size(3));
@@ -103,21 +103,21 @@ class PersistentHashMapTest {
     }
 
     @Test
-    void testPut4() {
+    void testPutAsCollision() {
         map.put(1, "1");
         map.put(17, "11");
         assertEquals("version: 3\n{(1 = 1), (17 = 11)}", map.toString(3));
     }
 
     @Test
-    void testRemove1() {
+    void testRemove() {
         map.put(1, "1");
         assertEquals("1", map.remove(1));
         assertEquals("version: 3\n{empty}", map.toString(3));
     }
 
     @Test
-    void testRemove2() {
+    void testRemoveByVersion() {
         map.put(1, "1");
         map.put(2, "2");
         assertEquals("1", map.remove(1, 3));
@@ -125,27 +125,20 @@ class PersistentHashMapTest {
     }
 
     @Test
-    void testToString1() {
+    void testToStringEmpty() {
         assertEquals("version: 1\n{empty}", map.toString());
     }
 
     @Test
-    void testToString2() {
+    void testToStringAfterPut() {
         map.put(1, "1");
         assertEquals("version: 2\n{(1 = 1)}", map.toString());
     }
 
     @Test
-    void testToString3() {
+    void testToStringByVersion() {
         map.put(1, "1");
         assertEquals("version: 1\n{empty}", map.toString(1));
-    }
-
-    @Test
-    void testToString4() {
-        map.put(1, "1");
-        map.put(2, "2");
-        assertEquals("version: 3\n{(1 = 1), (2 = 2)}", map.toString(3));
     }
 
     @Test

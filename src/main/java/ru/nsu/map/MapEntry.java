@@ -16,11 +16,6 @@ public class MapEntry<K, V> {
     }
 
     @Override
-    public int hashCode() {
-        return key.hashCode() * 42 + value.hashCode();
-    }
-
-    @Override
     public String toString() {
         return "(" + key + " = " + value + ")";
     }

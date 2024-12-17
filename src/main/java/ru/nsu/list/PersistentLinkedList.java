@@ -68,6 +68,10 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public boolean add(E e, int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
+
         try {
             ListNode<E> tail = new ListNode<>(e);
 
@@ -91,8 +95,11 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public boolean addAtIndex(int index, E e, int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
         if (index > size(version)) {
-            return false;
+            throw new IndexOutOfBoundsException();
         }
         if (index == size(version)) {
             return add(e, version);
@@ -126,6 +133,10 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public boolean remove(E e, int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
+
         try {
             ListNode<E> prev = versions.get(version - 1);
 
@@ -171,6 +182,13 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public boolean removeAtIndex(int index, int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
+        if (index > size(version)) {
+            throw new IndexOutOfBoundsException();
+        }
+
         try {
             ListNode<E> prev = versions.get(version - 1);
 
@@ -219,6 +237,13 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public ListNode<E> get(int index, int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
+        if (index > size(version)) {
+            throw new IndexOutOfBoundsException();
+        }
+
         ListNode<E> current = versions.get(version - 1);
 
         for (int i = 0; i < size(version) - index - 1; i++) {
@@ -239,9 +264,13 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public boolean set(int index, E e, int version) {
-        if (index > size(version)) {
-            return false;
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
         }
+        if (index > size(version)) {
+            throw new IndexOutOfBoundsException();
+        }
+
         if (index == size(version) - 1) {
             try {
                 ListNode<E> prev = versions.get(version - 1);
@@ -282,6 +311,10 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public boolean isEmpty(int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
+
         return size(version) == 0;
     }
 
@@ -292,6 +325,10 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public boolean contains(Object o, int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
+
         ListNode<E> prev = versions.get(version - 1);
 
         if (prev.getVal() == o) {
@@ -312,6 +349,10 @@ public class PersistentLinkedList<E> implements PersistentCollection<E> {
 
     @Override
     public String toString(int version) {
+        if (version > getCurrentVersion()) {
+            throw new IndexOutOfBoundsException("Version not exists");
+        }
+
         StringBuilder result = new StringBuilder();
         if (version == 0) {
             return "null";

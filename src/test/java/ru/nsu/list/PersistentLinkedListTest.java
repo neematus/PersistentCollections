@@ -13,51 +13,51 @@ class PersistentLinkedListTest {
     }
 
     @Test
-    void testSize1() {
+    void testSizeEmpty() {
         assertEquals(1, list.size());
     }
 
     @Test
-    void testSize2() {
+    void testSizeByVersion() {
         assertEquals(1, list.size(1));
     }
 
     @Test
-    void testAdd1() {
+    void testAdd() {
         list.add(2);
         list.add(3);
         assertEquals(3, list.size());
     }
 
     @Test
-    void testAdd2() {
+    void testAddByVersion() {
         list.add(2);
         list.add(3, 1);
         assertEquals("version: 3\n(1, 3)", list.toString(3));
     }
 
     @Test
-    void testAdd3() {
+    void testAddAtIndex() {
         list.add(3);
         list.addAtIndex(1, 2);
         assertEquals("version: 3\n(1, 2, 3)", list.toString(3));
     }
 
     @Test
-    void testAdd4() {
+    void testAddAtFirst() {
         list.addAtIndex(0, 0, 1);
         assertEquals("version: 2\n(0, 1)", list.toString());
     }
 
     @Test
-    void testRemove1() {
+    void testRemove() {
         list.add(2);
         list.remove(2);
         assertEquals("version: 3\n(1)", list.toString());
     }
 
     @Test
-    void testRemove2() {
+    void testRemoveByVersion() {
         list.add(2);
         list.add(3);
         list.remove(1, 3);
@@ -65,7 +65,7 @@ class PersistentLinkedListTest {
     }
 
     @Test
-    void testRemove3() {
+    void testRemoveAtIndex() {
         list.add(2);
         list.add(3);
         list.removeAtIndex(1);
@@ -73,7 +73,7 @@ class PersistentLinkedListTest {
     }
 
     @Test
-    void testRemove4() {
+    void testRemoveAtIndexByVersion() {
         list.add(2);
         list.add(3);
         list.add(4);
@@ -82,12 +82,12 @@ class PersistentLinkedListTest {
     }
 
     @Test
-    void testGet1() {
+    void testGet() {
         assertEquals(1, list.get(0).getVal());
     }
 
     @Test
-    void testGet2() {
+    void testGetByVersion() {
         list.add(2);
         list.add(3);
         assertEquals(2, list.get(1, 2).getVal());
@@ -95,13 +95,13 @@ class PersistentLinkedListTest {
     }
 
     @Test
-    void testSet1() {
+    void testSet() {
         list.set(0, 42);
         assertEquals("version: 2\n(42)", list.toString());
     }
 
     @Test
-    void testSet2() {
+    void testSetByVersion() {
         list.add(2);
         list.add(3);
         list.set(1, 42, 2);
@@ -109,29 +109,30 @@ class PersistentLinkedListTest {
     }
 
     @Test
-    void testIsEmpty1() {
+    void testIsEmpty() {
         assertFalse(list.isEmpty());
     }
 
     @Test
-    void testContains1() {
+    void testContains() {
         assertTrue(list.contains(1));
     }
 
     @Test
-    void testContains2() {
+    void testContainsByVersion() {
         list.add(2);
         list.add(3);
         assertTrue(list.contains(2, 3));
     }
 
     @Test
-    void testToString1() {
+    void testToString() {
         assertEquals("version: 1\n(1)", list.toString());
     }
 
     @Test
-    void testToString2() {
+    void testToStringByVersion() {
+        list.add(2);
         assertEquals("version: 1\n(1)", list.toString(1));
     }
 
