@@ -9,7 +9,6 @@ public class MapEntry<K, V> {
     private K key = null;
     private V value = null;
 
-    public MapEntry() {}
     public MapEntry(K key, V value) {
         this.key = key;
         this.value = value;
