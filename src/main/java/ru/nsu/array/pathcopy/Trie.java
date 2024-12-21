@@ -53,12 +53,13 @@ public class Trie<E> {
      * Получение элемента массива по индексу
      */
     public E getValue(int index) {
+        if (index > getNumberOfElements() - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+
         TrieNode<E> nodeWithValue = root;
         for (int i = depth - 1; i >= 0; i--) {
             nodeWithValue = (index >> i) % 2 == 0 ? nodeWithValue.getLeftChild() : nodeWithValue.getRightChild();
-            if (nodeWithValue == null) {
-                throw new IndexOutOfBoundsException();
-            }
         }
         return nodeWithValue.getValue();
     }

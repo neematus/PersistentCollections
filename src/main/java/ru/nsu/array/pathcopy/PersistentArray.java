@@ -48,6 +48,7 @@ public class PersistentArray<E> {
      * Получение элемента по индексу из данной версии массива
      */
     public E get(int index, int version) {
+        checkVersion(version);
         return versions.get(version - 1).getValue(index);
     }
 
@@ -62,8 +63,10 @@ public class PersistentArray<E> {
      * Изменение значения элемента по индексу в данной версии массива
      */
     public void set(int index, E value, int version) {
+        checkVersion(version);
+
         Trie<E> prevVersion = versions.get(version - 1);
-        if (prevVersion.getNumberOfElements() - 1 < index) {
+        if (index > prevVersion.getNumberOfElements() - 1) {
             throw new IndexOutOfBoundsException();
         }
 
@@ -85,6 +88,8 @@ public class PersistentArray<E> {
      * Добавление элемента в данную версию массива
      */
     public void add(E value, int version) {
+        checkVersion(version);
+
         Trie<E> prevVersion = versions.get(version - 1);
         Trie<E> newVersion = new Trie<>(prevVersion.getNumberOfElements() + 1);
 
@@ -142,10 +147,26 @@ public class PersistentArray<E> {
      * Получение строкового представления данной версии массива
      */
     public String toString(int version) {
+        checkVersion(version);
         return "version: " + version + "\n{" +
                 versions.get(version - 1).getValues().stream()
                         .map(E::toString)
                         .collect(Collectors.joining(", ")) + "}";
+    }
+
+    /**
+     * Возвращает текущую версию массива
+     */
+    public ArrayList<E> toArray() {
+        return toArray(getCurrentVersion());
+    }
+
+    /**
+     * Возвращает данную версию массива
+     */
+    public ArrayList<E> toArray(int version) {
+        checkVersion(version);
+        return new ArrayList<>(versions.get(version - 1).getValues());
     }
 
     /**
@@ -163,6 +184,12 @@ public class PersistentArray<E> {
     public void redo() {
         if (!redo.empty()) {
             versions.add(redo.pop());
+        }
+    }
+
+    private void checkVersion(int version) {
+        if (version < 1 || version > getCurrentVersion()) {
+            throw new IllegalArgumentException("Version [%s] does not exists".formatted(version));
         }
     }
 
